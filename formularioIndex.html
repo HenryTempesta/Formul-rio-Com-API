@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+
+ 
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        legend {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .control-label {
+            font-weight: bold;
+        }
+
+        .input-group-addon {
+            background-color: #f2f2f2;
+        }
+
+      
+        .form-control {
+            width: calc(100% - 30px);
+            padding: 10px;
+            border-radius: 3px;
+            border: 1px solid #ccc;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: #66afe9;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+        }
+
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 3px;
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+
+      
+        .input-group-addon i {
+            color: #555;
+        }
+
+                
+</style>
+<body>
+
+
+
+     <div class="container">
+
+        <form class="well form-horizontal" action="cadastro/cadastroFornecedor.php" method="post"  id="contact_form">
+    <fieldset>
+    
+    <legend>Cadastro de Clientes (com integração de API no CEP)</legend>
+    
+    <div class="form-group">
+      <label class="col-md-12 control-label">Primeiro nome</label>  
+      <div class="col-md-12 inputGroupContainer">
+      <div class="input-group">
+      <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+      <input  placeholder="Primeiro Nome" class="form-control"  type="text" name="forn_nome">
+        </div>
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label class="col-md-12 control-label" >Segundo Nome</label> 
+        <div class="col-md-12 inputGroupContainer">
+        <div class="input-group">
+      <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+      <input  placeholder="Segundo nome" class="form-control"  type="text" name="forn_sobrenome">
+        </div>
+      </div>
+    </div>
+
+           <div class="form-group">
+      <label class="col-md-12 control-label">E-Mail</label>  
+        <div class="col-md-12 inputGroupContainer">
+        <div class="input-group">
+            <span class="input-group-addon"><i class="glyphicon glyphicon-envelope"></i></span>
+      <input  placeholder="Endereço de e-mail" class="form-control"  type="email" name="forn_email">
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-md-12 control-label">Celular</label>  
+        <div class="col-md-12 inputGroupContainer">
+          <div class="input-group">
+            <span class="input-group-addon"><i class="glyphicon glyphicon-earphone"></i></span>
+            <input  placeholder="(xx)xxxxx-xxxx" class="form-control" type="text" id="telefone" maxlength="15" name="forn_celular">
+          </div>
+        </div>
+      </div>
+    
+      <script>
+       
+        function formatarTelefone() {
+          let inputTelefone = document.getElementById('telefone');
+          let telefone = inputTelefone.value.replace(/\D/g, ''); 
+    
+          if (telefone.length >= 2 && telefone.length <= 11) {
+           
+            inputTelefone.value = `(${telefone.substring(0, 2)}) ${telefone.substring(2, 7)}-${telefone.substring(7, 11)}`;
+          } else if (telefone.length > 2 && telefone.length <= 10) {
+       
+            inputTelefone.value = `${telefone.substring(0, 2)} ${telefone.substring(2, 7)}-${telefone.substring(7, 11)}`;
+          } else {
+          
+            inputTelefone.value = telefone;
+          }
+        }
+    
+       
+        document.getElementById('telefone').addEventListener('input', formatarTelefone);
+    
+       
+        window.addEventListener('load', formatarTelefone);
+      </script>
+    
+    <script>
+        function mascaraCep(val) {
+          return val.replace(/\D/g, "").replace(/(\d{5})(\d{3})/, "$1-$2");
+        }
+      </script>
+      
+      <div class="form-group">
+        <label class="col-md-12 control-label">CEP</label>
+        <div class="col-md-12 inputGroupContainer">
+          <div class="input-group">
+            <span class="input-group-addon"><i class="glyphicon glyphicon-home"></i></span>
+            <input  placeholder="Cep" class="form-control" type="text" id="cep"  onblur="buscarEndereco()" onkeypress="aplicarMascaraCep(event)" maxlength="9" name="forn_cep">
+        </div>
+        </div>
+      </div>
+
+         <script>
+           function aplicarMascaraCep(event) {
+                var cep = event.target.value;
+                cep = cep.replace(/\D/g, ""); 
+                cep = cep.replace(/^(\d{5})(\d)/, "$1-$2"); 
+                event.target.value = cep;
+            }
+        
+        function buscarEndereco() {
+            var cep = document.getElementById('cep').value;
+            var url = 'https://viacep.com.br/ws/' + cep + '/json/';
+
+            let inputRua = document.getElementById('rua');
+            let inputEstado = document.getElementById('estado');
+            let inputBairro = document.getElementById('bairro');
+            let inputCidade = document.getElementById('cidade');
+            let inputNumero = document.getElementById('numero');
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    inputRua.value = data.logradouro;
+                    inputEstado.value = data.uf;
+                    inputBairro.value = data.bairro;
+                    inputCidade.value = data.localidade;
+                    inputNumero.value = '';
+
+                    console.log("Buscou informações CEP " + data);
+                    
+                })
+                .catch(error => console.error('Erro na API:', error));
+        }
+    </script> 
+            
+        <div class="form-group">
+        <label class="col-md-12 control-label">Rua</label>  
+            <div class="col-md-12 inputGroupContainer">
+            <div class="input-group">
+                <span class="input-group-addon"><i class="glyphicon glyphicon-home"></i></span>
+        <input  placeholder="Endereço" class="form-control" type="text" id="rua"  name="forn_rua">
+            </div>
+        </div>
+        </div>
+
+        <div class="form-group">
+        <label class="col-md-4 control-label">Número</label>  
+            <div class="col-md-4 inputGroupContainer">
+            <div class="input-group">
+                <span class="input-group-addon"><i class="glyphicon glyphicon-home"></i></span>
+        <input  placeholder="Número" class="form-control" type="text" id="numero" name="forn_endereco_numero">
+            </div>
+        </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-md-12 control-label">Bairro</label>  
+                <div class="col-md-12 inputGroupContainer">
+                <div class="input-group">
+                    <span class="input-group-addon"><i class="glyphicon glyphicon-home"></i></span>
+            <input  placeholder="Endereço" class="form-control" type="text" id="bairro"  name="forn_bairro">
+                </div>
+            </div>
+            </div>
+
+        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+        
+        
+        <div class="form-group">
+        <label class="col-md-12 control-label">Cidade</label>  
+            <div class="col-md-12 inputGroupContainer">
+            <div class="input-group">
+                <span class="input-group-addon"><i class="glyphicon glyphicon-home"></i></span>
+        <input placeholder="Cidade" class="form-control"  type="text" id="cidade"  name="forn_cidade">
+            </div>
+        </div>
+        </div>
+
+
+        <div class="form-group">
+            <label class="col-md-12 control-label">Estado</label>  
+                <div class="col-md-12 inputGroupContainer">
+                <div class="input-group">
+                    <span class="input-group-addon"><i class="glyphicon glyphicon-home"></i></span>
+            <input  placeholder="Estado" class="form-control"  type="text" id="estado"  name="forn_estado">
+                </div>
+            </div>
+            </div>
+      
+    <div class="form-group">
+      <label class="col-md-12 control-label">Descrição dos produtos fornecidos</label>
+        <div class="col-md-12 inputGroupContainer">
+        <div class="input-group">
+            <span class="input-group-addon"><i class="glyphicon glyphicon-pencil"></i></span>
+                <textarea class="form-control" name="forn_descricao" placeholder="Descrição"></textarea>
+      </div>
+      </div>
+    </div>
+
+        <div class="form-group">
+            <div class="col-md-12">
+                <button type="button" class="btn btn-primary" onclick="window.location.href='outra_pagina.html';">Código deste formulário</button>
+            </div>
+        </div>
+
+
+
+</body>
+</html>
